@@ -3,7 +3,7 @@ import { ref, onMounted } from 'vue'
 import axios from 'axios'
 
 // 設定後端 API 網址 (這是我們剛剛用 Java 寫好的入口)
-const API_URL = const API_URL = import.meta.env.VITE_API_URL || 'http://localhost:8080/api/todos'
+const API_URL = import.meta.env.VITE_API_URL || 'http://localhost:8080/api/todos'
 
 const todos = ref([])
 const newTodoTitle = ref('')
