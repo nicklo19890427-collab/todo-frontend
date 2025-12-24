@@ -31,7 +31,11 @@ api.interceptors.response.use(
   (error: AxiosError) => {
     if (error.response) {
       const status = error.response.status
-      if (status === 401 || status === 403) {
+      const requestUrl = error.config?.url || '' // ✨ 取得請求的網址
+
+      // ✨ 修正邏輯：只有當 "非登入API" 發生 401 時，才強制登出跳轉
+      // 這樣輸入錯密碼時，就不會導致頁面重新整理了
+      if ((status === 401 || status === 403) && !requestUrl.includes('/auth/login')) {
         console.warn('權限失效，強制登出')
         localStorage.removeItem('todo_token')
         localStorage.removeItem('todo_user')

@@ -7,9 +7,14 @@ export const todoApi = {
     return api.get<Todo[]>('/api/todos')
   },
 
-  // 新增
-  create: (title: string) => {
-    return api.post<Todo>('/api/todos', { title, completed: false })
+  // ✨ 修改：多接收一個 categoryId 參數 (選填)
+  create: (title: string, categoryId?: number) => {
+    return request.post<Todo>('/todos', {
+      title,
+      // 如果有選分類，就傳送物件格式給後端 (後端 JPA 會自動對應 ID)
+      // 如果沒選 (undefined)，就傳 null
+      category: categoryId ? { id: categoryId } : null,
+    })
   },
 
   // 更新 (包含切換狀態或改標題)
