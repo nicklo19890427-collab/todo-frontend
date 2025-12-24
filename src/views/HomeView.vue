@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { ref, onMounted, computed } from 'vue'
+import { ref, onMounted, nextTick } from 'vue'
 import { useAuthStore } from '@/stores/auth'
 import { useTodoStore } from '@/stores/todo'
 import type { Todo } from '@/types'
@@ -11,6 +11,10 @@ const todoStore = useTodoStore()
 // 2. 本地狀態
 const newTodoTitle = ref('')
 const isLoading = ref(false)
+
+// 編輯模式的狀態
+const editingId = ref<number | null>(null)
+const editingTitle = ref('')
 
 // 3. 動作定義
 
@@ -36,11 +40,8 @@ const handleAddTodo = async () => {
 // 切換完成狀態
 const toggleTodo = async (todo: Todo) => {
   try {
-    // 這裡不需要手動改 todo.completed，因為 v-model 已經改了
-    // 我們只需要把最新的狀態傳給後端
     await todoStore.updateTodo(todo)
   } catch (error) {
-    // 如果失敗，就把狀態改回來 (復原 UI)
     todo.completed = !todo.completed
     alert('更新失敗')
   }
@@ -61,6 +62,52 @@ const handleDelete = async (id: number) => {
 const handleLogout = () => {
   if (confirm('確定要登出嗎？')) {
     authStore.logout()
+  }
+}
+
+// --- 編輯相關功能 ---
+
+// 開始編輯
+const startEdit = (todo: Todo) => {
+  if (todo.completed) return
+  editingId.value = todo.id
+  editingTitle.value = todo.title
+
+  nextTick(() => {
+    const input = document.getElementById(`edit-input-${todo.id}`) as HTMLInputElement
+    if (input) input.focus()
+  })
+}
+
+// 取消編輯
+const cancelEdit = () => {
+  editingId.value = null
+  editingTitle.value = ''
+}
+
+// 儲存編輯
+const saveEdit = async (todo: Todo) => {
+  if (editingId.value !== todo.id) return
+
+  const newTitle = editingTitle.value.trim()
+
+  if (!newTitle) {
+    cancelEdit()
+    return
+  }
+
+  if (newTitle === todo.title) {
+    cancelEdit()
+    return
+  }
+
+  try {
+    const updatedTodo = { ...todo, title: newTitle }
+    await todoStore.updateTodo(updatedTodo)
+    editingId.value = null
+  } catch (error) {
+    alert('標題更新失敗')
+    cancelEdit()
   }
 }
 </script>
@@ -93,7 +140,6 @@ const handleLogout = () => {
       >
         <input
           v-model="newTodoTitle"
-          @keyup.enter="handleAddTodo"
           type="text"
           placeholder="今天想要完成什麼？..."
           class="flex-1 px-6 py-4 bg-transparent outline-none text-gray-700 text-lg placeholder-gray-400"
@@ -141,16 +187,31 @@ const handleLogout = () => {
               </svg>
             </label>
 
-            <span
-              class="text-lg text-gray-700 truncate transition-all duration-200 select-none cursor-pointer"
-              :class="{ 'line-through text-gray-400': todo.completed }"
-              @click="(todo.completed = !todo.completed) && toggleTodo(todo)"
-            >
-              {{ todo.title }}
-            </span>
+            <div class="flex-1">
+              <input
+                v-if="editingId === todo.id"
+                :id="`edit-input-${todo.id}`"
+                v-model="editingTitle"
+                @blur="saveEdit(todo)"
+                @keyup.esc="cancelEdit"
+                type="text"
+                class="w-full px-2 py-1 border-b-2 border-emerald-500 outline-none bg-transparent text-lg text-gray-700"
+              />
+
+              <span
+                v-else
+                class="text-lg text-gray-700 truncate transition-all duration-200 select-none cursor-pointer block"
+                :class="{ 'line-through text-gray-400': todo.completed }"
+                @dblclick="startEdit(todo)"
+                title="雙擊編輯"
+              >
+                {{ todo.title }}
+              </span>
+            </div>
           </div>
 
           <button
+            v-if="editingId !== todo.id"
             @click="handleDelete(todo.id)"
             class="text-gray-300 hover:text-red-500 hover:bg-red-50 p-2 rounded-lg transition duration-200 opacity-0 group-hover:opacity-100 focus:opacity-100"
             title="刪除"
