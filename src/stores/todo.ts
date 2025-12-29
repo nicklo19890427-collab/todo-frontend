@@ -1,17 +1,14 @@
+// src/stores/todo.ts
 import { defineStore } from 'pinia'
 import { ref } from 'vue'
 import { todoApi } from '@/api/todos'
-import { categoryApi } from '@/api/categories' // ✨ 引入新 API
+import { categoryApi } from '@/api/categories'
 import type { Todo, Category } from '@/types'
 
 export const useTodoStore = defineStore('todo', () => {
-  // --- 1. 狀態 (State) ---
   const todos = ref<Todo[]>([])
-  const categories = ref<Category[]>([]) // ✨ 新增：分類列表
+  const categories = ref<Category[]>([])
 
-  // --- 2. 動作 (Actions) ---
-
-  // 取得所有列表 (Todo)
   const fetchTodos = async () => {
     try {
       const response = await todoApi.getAll()
@@ -21,7 +18,6 @@ export const useTodoStore = defineStore('todo', () => {
     }
   }
 
-  // ✨ 新增：取得所有分類
   const fetchCategories = async () => {
     try {
       const response = await categoryApi.getAll()
@@ -31,12 +27,17 @@ export const useTodoStore = defineStore('todo', () => {
     }
   }
 
-  // ✨ 修改：新增待辦 (支援分類 ID)
-  const addTodo = async (title: string, categoryId?: number) => {
-    if (!title.trim()) return
+  // ✨ 修改：addTodo 接收一個參數物件
+  const addTodo = async (payload: {
+    title: string
+    categoryId?: number
+    priority?: string
+    dueDate?: string
+  }) => {
+    if (!payload.title.trim()) return
     try {
-      // 呼叫 API 時把 categoryId 帶進去
-      const response = await todoApi.create(title, categoryId)
+      // 呼叫 API
+      const response = await todoApi.create(payload)
       todos.value.push(response.data)
     } catch (error) {
       console.error('新增失敗', error)
@@ -44,12 +45,12 @@ export const useTodoStore = defineStore('todo', () => {
     }
   }
 
-  // ✨ 新增：建立新分類
+  // ... (addCategory, updateTodo, deleteTodo 保持不變)
   const addCategory = async (name: string) => {
     if (!name.trim()) return
     try {
       const response = await categoryApi.create(name)
-      categories.value.push(response.data) // 加到本地列表，讓下拉選單立刻更新
+      categories.value.push(response.data)
       return response.data
     } catch (error) {
       console.error('新增分類失敗', error)
@@ -57,14 +58,11 @@ export const useTodoStore = defineStore('todo', () => {
     }
   }
 
-  // 更新與刪除 (保持不變)
   const updateTodo = async (todo: Todo) => {
     try {
       const response = await todoApi.update(todo.id, todo)
       const index = todos.value.findIndex((t) => t.id === todo.id)
-      if (index !== -1) {
-        todos.value[index] = response.data
-      }
+      if (index !== -1) todos.value[index] = response.data
     } catch (error) {
       console.error('更新失敗', error)
       throw error
@@ -83,11 +81,11 @@ export const useTodoStore = defineStore('todo', () => {
 
   return {
     todos,
-    categories, // ✨ 匯出分類狀態
+    categories,
     fetchTodos,
-    fetchCategories, // ✨ 匯出讀取分類動作
+    fetchCategories,
     addTodo,
-    addCategory, // ✨ 匯出新增分類動作
+    addCategory,
     updateTodo,
     deleteTodo,
   }

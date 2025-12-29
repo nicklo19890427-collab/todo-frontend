@@ -2,28 +2,20 @@ import api from './core'
 import type { Todo } from '@/types'
 
 export const todoApi = {
-  // 取得所有列表
-  getAll: () => {
-    return api.get<Todo[]>('/api/todos')
-  },
+  getAll: () => api.get<Todo[]>('/api/todos'),
 
-  // ✨ 修改：多接收一個 categoryId 參數 (選填)
-  create: (title: string, categoryId?: number) => {
+  // ✨ 修改：接收 title, categoryId, priority, dueDate
+  // 我們把參數改成用物件傳遞比較整潔，或者繼續加在後面
+  create: (data: { title: string; categoryId?: number; priority?: string; dueDate?: string }) => {
     return api.post<Todo>('/api/todos', {
-      title,
-      // 如果有選分類，就傳送物件格式給後端 (後端 JPA 會自動對應 ID)
-      // 如果沒選 (undefined)，就傳 null
-      category: categoryId ? { id: categoryId } : null,
+      title: data.title,
+      // 如果有選分類，傳物件；沒選傳 null
+      category: data.categoryId ? { id: data.categoryId } : null,
+      priority: data.priority || 'LOW', // 預設 LOW
+      dueDate: data.dueDate || null, // 沒選就是 null
     })
   },
 
-  // 更新 (包含切換狀態或改標題)
-  update: (id: number, data: Todo) => {
-    return api.put<Todo>(`/api/todos/${id}`, data)
-  },
-
-  // 刪除
-  delete: (id: number) => {
-    return api.delete(`/api/todos/${id}`)
-  },
+  update: (id: number, data: Todo) => api.put<Todo>(`/api/todos/${id}`, data),
+  delete: (id: number) => api.delete(`/api/todos/${id}`),
 }
