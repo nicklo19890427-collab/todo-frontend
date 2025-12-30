@@ -89,7 +89,7 @@ const handleCreate = () => {
 
     <BaseDatePicker
       :model-value="dueDate"
-      @update:model-value="emit('update:dueDate', $event)"
+      @update:model-value="emit('update:dueDate', $event || '')"
       placeholder="截止日期"
     />
 
