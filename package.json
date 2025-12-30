@@ -18,10 +18,14 @@
     "format": "prettier --write --experimental-cli src/"
   },
   "dependencies": {
+    "@fortawesome/fontawesome-svg-core": "^7.1.0",
+    "@fortawesome/free-solid-svg-icons": "^7.1.0",
+    "@fortawesome/vue-fontawesome": "^3.1.2",
     "@tailwindcss/vite": "^4.1.18",
     "axios": "^1.13.2",
     "pinia": "^3.0.4",
     "tailwindcss": "^4.1.18",
+    "v-calendar": "^3.1.2",
     "vue": "^3.5.25",
     "vue-router": "^4.6.3"
   },
