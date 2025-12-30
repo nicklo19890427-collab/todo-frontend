@@ -5,7 +5,6 @@ import {
   faFire,
   faBolt,
   faMugHot,
-  faCalendarDays,
   faPlus,
   faCheck,
   faXmark,

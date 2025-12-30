@@ -13,7 +13,7 @@ export interface SelectOption {
 const props = defineProps<{
   modelValue: string | number | ''
   options: SelectOption[]
-  icon?: any
+  icon?: object
   iconClass?: string
   placeholder?: string
 }>()

@@ -6,7 +6,7 @@ defineProps<{
   modelValue: string | number
   type?: string
   placeholder?: string
-  icon?: any
+  icon?: object
   autofocus?: boolean
 }>()
 

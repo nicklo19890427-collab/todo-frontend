@@ -47,7 +47,7 @@ const displayValue = computed(() => {
   return `${Y}/${M}/${D} ${h}:${m}`
 })
 
-const onDayClick = (_: any, event: MouseEvent) => {
+const onDayClick = (_: unknown, event: MouseEvent) => {
   const target = event.target as HTMLElement
   target?.blur()
 }
