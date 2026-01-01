@@ -9,9 +9,21 @@ export const useTodoStore = defineStore('todo', () => {
   const todos = ref<Todo[]>([])
   const categories = ref<Category[]>([])
 
-  const fetchTodos = async () => {
+  // ✨ 修改：fetchTodos 支援傳入篩選參數
+  const fetchTodos = async (filters?: {
+    categoryId?: number
+    priority?: string
+    date?: string
+  }) => {
     try {
-      const response = await todoApi.getAll()
+      let response
+      // 如果有任何篩選條件，就走搜尋 API
+      if (filters && (filters.categoryId || filters.priority || filters.date)) {
+        response = await todoApi.search(filters)
+      } else {
+        // 否則走原本的 getAll (雖然搜尋 API 參數全空也有一樣效果，但保留 getAll 語意較清晰)
+        response = await todoApi.getAll()
+      }
       todos.value = response.data
     } catch (error) {
       console.error('讀取 Todo 失敗', error)

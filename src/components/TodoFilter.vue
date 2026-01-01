@@ -1,20 +1,17 @@
 <script setup lang="ts">
-import { ref, computed } from 'vue'
+import { computed } from 'vue'
 import {
   faFolderOpen,
   faFire,
   faBolt,
   faMugHot,
-  faPlus,
-  faCheck,
-  faXmark,
+  // faPlus, faCheck, faXmark 移除了
 } from '@fortawesome/free-solid-svg-icons'
-import type { Category } from '@/types' // 移除沒用到的 FontAwesomeIcon 引入
+import type { Category } from '@/types'
 
-import BaseInput from '@/components/ui/BaseInput.vue'
 import BaseSelect from '@/components/ui/BaseSelect.vue'
-import BaseButton from '@/components/ui/BaseButton.vue'
 import BaseDatePicker from '@/components/ui/BaseDatePicker.vue'
+// BaseButton, BaseInput 移除了
 
 const props = defineProps<{
   categories: Category[]
@@ -27,11 +24,8 @@ const emit = defineEmits<{
   (e: 'update:categoryId', value: number | ''): void
   (e: 'update:priority', value: string): void
   (e: 'update:dueDate', value: string): void
-  (e: 'create-category', name: string): void
+  // create-category 移除了
 }>()
-
-const isCreating = ref(false)
-const newCategoryName = ref('')
 
 const categoryOptions = computed(() => {
   return props.categories.map((cat) => ({
@@ -41,12 +35,12 @@ const categoryOptions = computed(() => {
 })
 
 const priorityOptions = [
+  { value: 'ALL', label: '全部' },
   { value: 'LOW', label: '低' },
   { value: 'MEDIUM', label: '中' },
   { value: 'HIGH', label: '高' },
 ]
 
-// --- ✨ 新增：計算優先級的 Icon 和顏色 ---
 const priorityConfig = computed(() => {
   switch (props.priority) {
     case 'HIGH':
@@ -54,17 +48,12 @@ const priorityConfig = computed(() => {
     case 'MEDIUM':
       return { icon: faBolt, class: 'text-amber-500' }
     case 'LOW':
-    default:
       return { icon: faMugHot, class: 'text-blue-500' }
+    case 'ALL':
+    default:
+      return { icon: undefined, class: '' }
   }
 })
-
-const handleCreate = () => {
-  if (!newCategoryName.value.trim()) return
-  emit('create-category', newCategoryName.value)
-  newCategoryName.value = ''
-  isCreating.value = false
-}
 </script>
 
 <template>
@@ -74,7 +63,7 @@ const handleCreate = () => {
       @update:model-value="emit('update:categoryId', $event === '' ? '' : Number($event))"
       :options="categoryOptions"
       :icon="faFolderOpen"
-      placeholder="未分類"
+      placeholder="所有分類"
       class="w-36"
     />
 
@@ -90,49 +79,7 @@ const handleCreate = () => {
     <BaseDatePicker
       :model-value="dueDate"
       @update:model-value="emit('update:dueDate', $event || '')"
-      placeholder="截止日期"
+      placeholder="篩選日期"
     />
-
-    <div class="flex items-center gap-2 ml-auto">
-      <BaseButton v-if="!isCreating" variant="ghost" :icon="faPlus" @click="isCreating = true">
-        新增分類
-      </BaseButton>
-      <div v-else class="flex items-center gap-1 animate-fadeIn">
-        <BaseInput
-          v-model="newCategoryName"
-          placeholder="分類名稱..."
-          class="w-32"
-          autofocus
-          @keyup-enter="handleCreate"
-        />
-        <BaseButton
-          size="sm"
-          variant="ghost"
-          class="text-emerald-600 hover:bg-emerald-100"
-          @click="handleCreate"
-        >
-          <font-awesome-icon :icon="faCheck" />
-        </BaseButton>
-        <BaseButton size="sm" variant="ghost" class="text-gray-400" @click="isCreating = false">
-          <font-awesome-icon :icon="faXmark" />
-        </BaseButton>
-      </div>
-    </div>
   </div>
 </template>
-
-<style scoped>
-@keyframes fadeIn {
-  from {
-    opacity: 0;
-    transform: translateY(-5px);
-  }
-  to {
-    opacity: 1;
-    transform: translateY(0);
-  }
-}
-.animate-fadeIn {
-  animation: fadeIn 0.2s ease-out;
-}
-</style>
