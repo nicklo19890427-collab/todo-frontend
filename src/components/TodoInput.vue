@@ -2,6 +2,7 @@
 import { ref, computed } from 'vue'
 import { faPlus } from '@fortawesome/free-solid-svg-icons'
 import type { Category } from '@/types'
+import { getIconByName } from '@/utils/categoryIcons'
 
 import BaseInput from '@/components/ui/BaseInput.vue'
 import BaseButton from '@/components/ui/BaseButton.vue'
@@ -36,6 +37,7 @@ const categoryOptions = computed(() => {
   return props.categories.map((c) => ({
     value: c.id,
     label: c.name,
+    icon: getIconByName(c.icon), // ✨ 加入這行：把字串轉成 Icon 物件
   }))
 })
 

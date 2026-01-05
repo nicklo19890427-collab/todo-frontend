@@ -1,36 +1,12 @@
 <script setup lang="ts">
-import { ref } from 'vue'
+import { useRouter } from 'vue-router' // ✨ Import
 import { FontAwesomeIcon } from '@fortawesome/vue-fontawesome'
-import {
-  faRightFromBracket,
-  faListCheck,
-  faPlus,
-  faCheck,
-  faXmark,
-} from '@fortawesome/free-solid-svg-icons'
-import BaseButton from '@/components/ui/BaseButton.vue'
-import BaseInput from '@/components/ui/BaseInput.vue'
+import { faRightFromBracket, faListCheck, faGear } from '@fortawesome/free-solid-svg-icons' // ✨ faGear
 
-defineProps<{
-  username: string
-}>()
+defineProps<{ username: string }>()
+defineEmits<{ (e: 'logout'): void }>() // create-category 移除了
 
-const emit = defineEmits<{
-  (e: 'logout'): void
-  (e: 'create-category', name: string): void // ✨ 新增事件
-}>()
-
-// ✨ 新增：控制分類輸入框的狀態
-const isCreatingCategory = ref(false)
-const newCategoryName = ref('')
-
-const handleCreateCategory = () => {
-  if (newCategoryName.value.trim()) {
-    emit('create-category', newCategoryName.value)
-    newCategoryName.value = ''
-    isCreatingCategory.value = false
-  }
-}
+const router = useRouter() // ✨
 </script>
 
 <template>
@@ -48,42 +24,16 @@ const handleCreateCategory = () => {
     </div>
 
     <div class="flex items-center gap-4">
-      <div class="flex items-center gap-2">
-        <BaseButton
-          v-if="!isCreatingCategory"
-          size="sm"
-          variant="ghost"
-          :icon="faPlus"
-          @click="isCreatingCategory = true"
-          class="text-gray-500 hover:text-emerald-600"
-        >
-          新增分類
-        </BaseButton>
-
-        <div v-else class="flex items-center gap-1 animate-fadeIn">
-          <BaseInput
-            v-model="newCategoryName"
-            placeholder="分類名稱"
-            class="w-32"
-            autofocus
-            @keyup-enter="handleCreateCategory"
-          />
-          <button
-            @click="handleCreateCategory"
-            class="p-1.5 text-emerald-500 hover:bg-emerald-50 rounded transition"
-          >
-            <font-awesome-icon :icon="faCheck" />
-          </button>
-          <button
-            @click="isCreatingCategory = false"
-            class="p-1.5 text-gray-400 hover:bg-gray-50 rounded transition"
-          >
-            <font-awesome-icon :icon="faXmark" />
-          </button>
-        </div>
-      </div>
+      <button
+        @click="router.push('/settings')"
+        class="flex items-center gap-2 text-sm text-gray-500 hover:text-emerald-600 transition font-medium"
+      >
+        <span>設定</span>
+        <font-awesome-icon :icon="faGear" />
+      </button>
 
       <div class="h-6 w-px bg-gray-200"></div>
+
       <button
         @click="$emit('logout')"
         class="flex items-center gap-2 text-sm text-gray-500 hover:text-red-500 transition font-medium"
@@ -94,19 +44,3 @@ const handleCreateCategory = () => {
     </div>
   </header>
 </template>
-
-<style scoped>
-@keyframes fadeIn {
-  from {
-    opacity: 0;
-    transform: translateY(-5px);
-  }
-  to {
-    opacity: 1;
-    transform: translateY(0);
-  }
-}
-.animate-fadeIn {
-  animation: fadeIn 0.2s ease-out;
-}
-</style>

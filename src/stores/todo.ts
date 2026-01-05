@@ -58,10 +58,11 @@ export const useTodoStore = defineStore('todo', () => {
   }
 
   // ... (addCategory, updateTodo, deleteTodo 保持不變)
-  const addCategory = async (name: string) => {
+  // ✨ 修改：接收 icon 參數
+  const addCategory = async (name: string, icon: string = 'folder') => {
     if (!name.trim()) return
     try {
-      const response = await categoryApi.create(name)
+      const response = await categoryApi.create(name, icon)
       categories.value.push(response.data)
       return response.data
     } catch (error) {

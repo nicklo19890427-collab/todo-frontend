@@ -8,6 +8,7 @@ import {
   // faPlus, faCheck, faXmark 移除了
 } from '@fortawesome/free-solid-svg-icons'
 import type { Category } from '@/types'
+import { getIconByName } from '@/utils/categoryIcons'
 
 import BaseSelect from '@/components/ui/BaseSelect.vue'
 import BaseDatePicker from '@/components/ui/BaseDatePicker.vue'
@@ -31,6 +32,7 @@ const categoryOptions = computed(() => {
   return props.categories.map((cat) => ({
     value: cat.id,
     label: cat.name,
+    icon: getIconByName(cat.icon), // ✨ 加入這行：把字串轉成 Icon 物件
   }))
 })
 

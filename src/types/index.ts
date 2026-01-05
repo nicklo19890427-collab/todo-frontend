@@ -2,6 +2,7 @@
 export interface Category {
   id: number
   name: string
+  icon?: string // ✨ 新增
 }
 
 // 定義 "待辦事項" 的資料結構

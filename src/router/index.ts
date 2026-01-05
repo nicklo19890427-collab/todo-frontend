@@ -3,6 +3,7 @@ import { useAuthStore } from '@/stores/auth' // 引入我們等一下要確認�
 // 引入頁面元件 (我們下一步會建立這些檔案)
 import HomeView from '@/views/HomeView.vue'
 import LoginView from '@/views/LoginView.vue'
+import SettingsView from '@/views/SettingsView.vue'
 
 const router = createRouter({
   // 使用 HTML5 的 History 模式 (網址看起來很乾淨，沒有 #)
@@ -20,6 +21,12 @@ const router = createRouter({
       path: '/login',
       name: 'login',
       component: LoginView,
+    },
+    {
+      path: '/settings',
+      name: 'settings',
+      component: SettingsView,
+      meta: { requiresAuth: true },
     },
   ],
 })

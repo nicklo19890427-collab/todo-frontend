@@ -3,11 +3,11 @@ import { ref, computed, onMounted, onUnmounted } from 'vue'
 import { FontAwesomeIcon } from '@fortawesome/vue-fontawesome'
 import { faChevronDown } from '@fortawesome/free-solid-svg-icons'
 
-// 定義選項的格式
 export interface SelectOption {
   value: string | number
   label: string
   color?: string
+  icon?: object // ✨ 新增：選項可以有 Icon
 }
 
 const props = defineProps<{
@@ -25,33 +25,24 @@ const emit = defineEmits<{
 const isOpen = ref(false)
 const containerRef = ref<HTMLElement | null>(null)
 
+// 計算選中的標籤 (這裡也可以改為顯示選中的 Icon，但為了簡潔我們先保持顯示文字)
 const selectedLabel = computed(() => {
   const selected = props.options.find((opt) => opt.value === props.modelValue)
   return selected ? selected.label : props.placeholder || '請選擇'
 })
 
-const toggle = () => {
-  isOpen.value = !isOpen.value
-}
-
+const toggle = () => (isOpen.value = !isOpen.value)
 const selectOption = (value: string | number) => {
   emit('update:modelValue', value)
   isOpen.value = false
 }
-
 const handleClickOutside = (event: MouseEvent) => {
   if (containerRef.value && !containerRef.value.contains(event.target as Node)) {
     isOpen.value = false
   }
 }
-
-onMounted(() => {
-  document.addEventListener('click', handleClickOutside)
-})
-
-onUnmounted(() => {
-  document.removeEventListener('click', handleClickOutside)
-})
+onMounted(() => document.addEventListener('click', handleClickOutside))
+onUnmounted(() => document.removeEventListener('click', handleClickOutside))
 </script>
 
 <template>
@@ -105,7 +96,15 @@ onUnmounted(() => {
           class="px-3 py-2 cursor-pointer hover:bg-emerald-50 hover:text-emerald-700 transition flex items-center justify-between"
           :class="{ 'bg-emerald-50 text-emerald-700 font-medium': modelValue === opt.value }"
         >
-          <span>{{ opt.label }}</span>
+          <div class="flex items-center gap-2">
+            <font-awesome-icon
+              v-if="opt.icon"
+              :icon="opt.icon"
+              class="text-gray-400 w-4 text-center"
+              :class="{ 'text-emerald-600': modelValue === opt.value }"
+            />
+            <span>{{ opt.label }}</span>
+          </div>
 
           <span v-if="modelValue === opt.value" class="text-emerald-500">•</span>
         </li>
@@ -120,11 +119,9 @@ onUnmounted(() => {
 
 <style scoped>
 @reference "@/assets/main.css";
-
 .input-base {
   @apply bg-white border border-gray-300 text-gray-700 text-sm rounded-lg hover:border-emerald-400 transition py-2;
 }
-
 .dropdown-enter-active,
 .dropdown-leave-active {
   transition: all 0.2s ease;
