@@ -1,22 +1,29 @@
 <script setup lang="ts">
 import { ref, onMounted, watch } from 'vue'
+import { faPlus } from '@fortawesome/free-solid-svg-icons' // ✨ Import Plus Icon
 import { useAuthStore } from '@/stores/auth'
 import { useTodoStore } from '@/stores/todo'
 import type { Todo } from '@/types'
 import { simpleDialog } from '@/plugins/simpleDialog'
+
 import TodoHeader from '@/components/TodoHeader.vue'
 import TodoFilter from '@/components/TodoFilter.vue'
-import TodoInput from '@/components/TodoInput.vue'
 import TodoList from '@/components/TodoList.vue'
+import TodoFormDialog from '@/components/TodoFormDialog.vue' // ✨ Import Dialog
+import BaseButton from '@/components/ui/BaseButton.vue' // ✨ Import Button
 
-// ... (狀態與 loadTodos 邏輯保持不變) ...
 const authStore = useAuthStore()
 const todoStore = useTodoStore()
 
+// ... (Filter 狀態保持不變) ...
 const selectedCategoryId = ref<number | ''>('')
 const selectedPriority = ref('ALL')
 const selectedDueDate = ref('')
 const isLoading = ref(false)
+
+// ✨ 新增：Dialog 相關狀態
+const isFormDialogOpen = ref(false)
+const editingTodo = ref<Todo | null>(null) // 如果有值就是編輯，null 就是新增
 
 const loadTodos = async () => {
   isLoading.value = true
@@ -41,22 +48,47 @@ watch(
   { deep: true },
 )
 
-// ✨ 修改：handleAddTodo 接收包含 dueDate 的 payload
-const handleAddTodo = async (payload: {
+// ✨ 新增：打開新增視窗
+const openAddDialog = () => {
+  editingTodo.value = null // 清空編輯狀態
+  isFormDialogOpen.value = true
+}
+
+// ✨ 新增：打開編輯視窗
+const openEditDialog = (todo: Todo) => {
+  editingTodo.value = todo // 設定要編輯的物件
+  isFormDialogOpen.value = true
+}
+
+// ✨ 新增：統一處理提交 (新增或更新)
+const handleFormSubmit = async (payload: {
   title: string
   categoryId?: number
   priority?: string
   dueDate?: string
 }) => {
   try {
-    await todoStore.addTodo({
-      title: payload.title,
-      categoryId: payload.categoryId,
-      priority: payload.priority || 'LOW',
-      dueDate: payload.dueDate, // 這裡接收到了日期
-    })
-  } catch {
-    alert('新增失敗')
+    if (editingTodo.value) {
+      // 編輯模式
+      await todoStore.updateTodo({
+        ...editingTodo.value, // 保留原有的 id, completed 等欄位
+        title: payload.title,
+        category: payload.categoryId ? { id: payload.categoryId } : undefined, // 注意這裡需要轉成物件結構或對應後端需求
+        priority: payload.priority || 'LOW',
+        dueDate: payload.dueDate,
+      } as Todo)
+    } else {
+      // 新增模式
+      await todoStore.addTodo({
+        title: payload.title,
+        categoryId: payload.categoryId,
+        priority: payload.priority || 'LOW',
+        dueDate: payload.dueDate,
+      })
+    }
+  } catch (e) {
+    alert('操作失敗')
+    console.error(e)
   }
 }
 
@@ -68,45 +100,18 @@ const toggleTodo = async (todo: Todo) => {
     alert('更新失敗')
   }
 }
-const handleUpdateTodo = async (todo: Todo) => {
-  try {
-    await todoStore.updateTodo(todo)
-  } catch {
-    alert('更新失敗')
-  }
-}
-// ✨ 2. 修改：刪除確認 (展示 HTML 功能)
+
 const handleDelete = async (id: number) => {
-  // 使用 simpleDialog 取代 window.confirm
   const isConfirmed = await simpleDialog.confirm(
-    // Title: 使用 HTML 加上紅色樣式
     `<span class="text-red-600 font-bold">⚠️ 刪除警告</span>`,
-
-    // Content: 使用 HTML 換行並縮小說明文字
     `您確定要刪除這筆待辦事項嗎？<br><span class="text-sm text-gray-400">此動作將無法復原。</span>`,
-
-    // Options
-    {
-      html: true, // 記得開啟 HTML 模式
-      confirmText: '確認刪除',
-      cancelText: '再想想',
-    },
+    { html: true, confirmText: '確認刪除', cancelText: '再想想' },
   )
-
-  if (isConfirmed) {
-    await todoStore.deleteTodo(id)
-  }
+  if (isConfirmed) await todoStore.deleteTodo(id)
 }
-// ✨ 3. 修改：登出確認
-const handleLogout = async () => {
-  const isConfirmed = await simpleDialog.confirm('登出系統', '您確定要登出嗎？', {
-    confirmText: '登出',
-    cancelText: '取消',
-  })
 
-  if (isConfirmed) {
-    authStore.logout()
-  }
+const handleLogout = async () => {
+  if (await simpleDialog.confirm('登出系統', '您確定要登出嗎？')) authStore.logout()
 }
 </script>
 
@@ -115,7 +120,16 @@ const handleLogout = async () => {
     <div class="max-w-3xl mx-auto">
       <TodoHeader :username="authStore.user" @logout="handleLogout" />
 
-      <TodoInput :categories="todoStore.categories" @add="handleAddTodo" />
+      <div class="mb-6 flex justify-end">
+        <BaseButton
+          variant="primary"
+          :icon="faPlus"
+          class="w-full sm:w-auto shadow-sm py-2 px-4 text-base"
+          @click="openAddDialog"
+        >
+          新增待辦事項
+        </BaseButton>
+      </div>
 
       <TodoFilter
         :categories="todoStore.categories"
@@ -131,8 +145,15 @@ const handleLogout = async () => {
         :todos="todoStore.todos"
         :loading="isLoading"
         @toggle="toggleTodo"
-        @update="handleUpdateTodo"
+        @edit="openEditDialog"
         @delete="handleDelete"
+      />
+
+      <TodoFormDialog
+        v-model="isFormDialogOpen"
+        :todo="editingTodo"
+        :categories="todoStore.categories"
+        @submit="handleFormSubmit"
       />
     </div>
   </div>

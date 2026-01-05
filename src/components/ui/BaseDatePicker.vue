@@ -61,6 +61,13 @@ const onDayClick = (_: unknown, event: MouseEvent) => {
       color="emerald"
       is24hr
       hide-time-header
+      :popover="{
+        teleport: 'body',
+        visibility: 'click',
+        placement: 'bottom-start',
+        strategy: 'fixed',
+        class: 'my-popover-class' /* ✨ 1. 加入自訂 Class，確保能選中它 */,
+      }"
       @dayclick="onDayClick"
     >
       <template #default="{ togglePopover }">
@@ -100,16 +107,26 @@ const onDayClick = (_: unknown, event: MouseEvent) => {
 .input-base {
   @apply bg-white border border-gray-300 text-gray-700 text-sm rounded-lg hover:border-emerald-400 transition py-2;
 }
+</style>
 
-/* ✨ 新增：解決 V-Calendar 被選取日期背景消失的問題 */
-/* 使用 :deep() 穿透元件 scoped 限制，強制設定選取狀態的樣式 */
-:deep(.vc-day-content.vc-highlight-content-solid) {
+<style>
+/* 針對剛剛設定的自訂 Class 提升層級 */
+.my-popover-class {
+  z-index: 9999 !important;
+}
+
+/* 如果 v-calendar 內部還有其他 wrapper 擋住，也可以加這行保險 */
+.vc-popover-content {
+  z-index: 9999 !important;
+}
+
+/* 顏色修復 (因為移出了 Scoped 範圍) */
+.my-popover-class .vc-day-content.vc-highlight-content-solid {
   background-color: #10b981 !important; /* emerald-500 */
   color: #ffffff !important;
 }
 
-/* 滑鼠懸停時的效果 */
-:deep(.vc-day-content.vc-highlight-content-solid:hover) {
+.my-popover-class .vc-day-content.vc-highlight-content-solid:hover {
   background-color: #059669 !important; /* emerald-600 */
 }
 </style>

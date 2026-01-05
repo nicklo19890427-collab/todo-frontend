@@ -1,5 +1,4 @@
 <script setup lang="ts">
-import { ref, nextTick } from 'vue'
 import type { Todo } from '@/types'
 import {
   faSpinner,
@@ -17,35 +16,13 @@ import { FontAwesomeIcon } from '@fortawesome/vue-fontawesome'
 import BaseButton from '@/components/ui/BaseButton.vue'
 
 defineProps<{ todos: Todo[]; loading: boolean }>()
+
+// ✨ 修改：移除 update 事件，改為 edit 事件 (傳出整個 todo 讓父層處理)
 const emit = defineEmits<{
   (e: 'toggle', todo: Todo): void
   (e: 'delete', id: number): void
-  (e: 'update', todo: Todo): void
+  (e: 'edit', todo: Todo): void
 }>()
-
-const editingId = ref<number | null>(null)
-const editingTitle = ref('')
-
-const startEdit = (todo: Todo) => {
-  if (todo.completed) return
-  editingId.value = todo.id
-  editingTitle.value = todo.title
-  nextTick(() => {
-    const input = document.getElementById(`edit-input-${todo.id}`) as HTMLInputElement
-    if (input) input.focus()
-  })
-}
-
-const cancelEdit = () => {
-  editingId.value = null
-  editingTitle.value = ''
-}
-const saveEdit = (todo: Todo) => {
-  if (editingId.value !== todo.id) return
-  const newTitle = editingTitle.value.trim()
-  if (newTitle && newTitle !== todo.title) emit('update', { ...todo, title: newTitle })
-  cancelEdit()
-}
 
 const getPriorityColor = (priority: string) => {
   switch (priority) {
@@ -89,23 +66,12 @@ const getPriorityColor = (priority: string) => {
         </label>
 
         <div class="flex-1 flex flex-col justify-center gap-1">
-          <input
-            v-if="editingId === todo.id"
-            :id="`edit-input-${todo.id}`"
-            v-model="editingTitle"
-            @blur="saveEdit(todo)"
-            @keyup.enter="saveEdit(todo)"
-            @keyup.esc="cancelEdit"
-            type="text"
-            class="w-full px-2 py-1 border-b-2 border-emerald-500 outline-none bg-transparent text-lg text-gray-700"
-          />
           <span
-            v-else
-            class="text-lg text-gray-700 truncate cursor-pointer select-none"
+            class="text-lg text-gray-700 truncate select-none transition-colors"
             :class="{ 'line-through text-gray-400': todo.completed }"
-            @dblclick="startEdit(todo)"
-            >{{ todo.title }}</span
           >
+            {{ todo.title }}
+          </span>
 
           <div class="flex items-center gap-2 text-xs flex-wrap">
             <span
@@ -135,14 +101,13 @@ const getPriorityColor = (priority: string) => {
 
       <div class="flex items-center opacity-0 group-hover:opacity-100 transition-opacity gap-1">
         <BaseButton
-          v-if="editingId !== todo.id"
           variant="ghost"
           class="text-gray-400 hover:text-blue-500"
-          @click="startEdit(todo)"
+          @click="emit('edit', todo)"
         >
           <font-awesome-icon :icon="faPenToSquare" />
         </BaseButton>
-        <BaseButton v-if="editingId !== todo.id" variant="danger" @click="emit('delete', todo.id)">
+        <BaseButton variant="danger" @click="emit('delete', todo.id)">
           <font-awesome-icon :icon="faTrashCan" />
         </BaseButton>
       </div>
