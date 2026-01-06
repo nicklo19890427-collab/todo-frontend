@@ -51,7 +51,12 @@ onMounted(async () => {
 watch(
   query,
   (newQuery) => {
-    todoStore.fetchTodos(newQuery)
+    todoStore.fetchTodos({
+      keyword: newQuery.keyword || undefined,
+      categoryId: newQuery.categoryId === '' ? undefined : Number(newQuery.categoryId),
+      priority: newQuery.priority === 'ALL' ? undefined : newQuery.priority,
+      date: newQuery.dueDate || undefined,
+    })
   },
   { deep: true },
 ) // deep: true 確保物件內部屬性改變也能監聽到
