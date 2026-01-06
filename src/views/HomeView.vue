@@ -21,6 +21,14 @@ const selectedPriority = ref('ALL')
 const selectedDueDate = ref('')
 const isLoading = ref(false)
 
+// 修改 query 定義，加入 keyword
+const query = ref({
+  keyword: '',
+  categoryId: '' as number | '',
+  priority: 'ALL',
+  dueDate: '',
+})
+
 // ✨ 新增：Dialog 相關狀態
 const isFormDialogOpen = ref(false)
 const editingTodo = ref<Todo | null>(null) // 如果有值就是編輯，null 就是新增
@@ -39,6 +47,14 @@ onMounted(async () => {
   await todoStore.fetchCategories()
   await loadTodos()
 })
+
+watch(
+  query,
+  (newQuery) => {
+    todoStore.fetchTodos(newQuery)
+  },
+  { deep: true },
+) // deep: true 確保物件內部屬性改變也能監聽到
 
 watch(
   [selectedCategoryId, selectedPriority, selectedDueDate],
@@ -133,12 +149,10 @@ const handleLogout = async () => {
 
       <TodoFilter
         :categories="todoStore.categories"
-        :category-id="selectedCategoryId"
-        :priority="selectedPriority"
-        :due-date="selectedDueDate"
-        @update:category-id="selectedCategoryId = $event"
-        @update:priority="selectedPriority = $event"
-        @update:due-date="selectedDueDate = $event"
+        v-model:keyword="query.keyword"
+        v-model:categoryId="query.categoryId"
+        v-model:priority="query.priority"
+        v-model:dueDate="query.dueDate"
       />
 
       <TodoList

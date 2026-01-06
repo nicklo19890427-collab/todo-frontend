@@ -116,7 +116,6 @@ const format = (date: Date) => {
 </template>
 
 <style scoped>
-@reference "@/assets/main.css";
 .input-base {
   @apply bg-white border border-gray-300 text-gray-700 text-sm rounded-lg hover:border-emerald-400 transition py-2;
 }
