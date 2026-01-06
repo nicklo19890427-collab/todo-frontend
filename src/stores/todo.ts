@@ -17,29 +17,28 @@ export const useTodoStore = defineStore('todo', () => {
 
   // 取得待辦事項 (支援篩選)
   const fetchTodos = async (filters?: {
-    keyword?: string // ✨ 確保這裡跟 API 參數一致
+    keyword?: string
     categoryId?: number
     priority?: string
     date?: string
+    sortBy?: string // 新增
+    direction?: string // 新增
   }) => {
-    // 開始載入前，設定 isLoading 為 true
     isLoading.value = true
-    error.value = null // 清空舊的錯誤
+    error.value = null
 
     try {
       let response
-      // 只要有傳入 filters 且裡面有值，就走搜尋 API
-      if (filters && (filters.keyword || filters.categoryId || filters.priority || filters.date)) {
-        // 注意：這裡要做參數轉換，因為 store 接收的參數名稱可能跟 API 需要的不完全一樣
-        // 確保傳給 api.search 的物件符合 { keyword, categoryId, priority, date }
+      if (filters) {
         response = await todoApi.search({
           keyword: filters.keyword,
           categoryId: filters.categoryId,
           priority: filters.priority,
           date: filters.date,
+          sortBy: filters.sortBy,
+          direction: filters.direction,
         })
       } else {
-        // 否則載入全部
         response = await todoApi.getAll()
       }
       todos.value = response.data
@@ -47,7 +46,6 @@ export const useTodoStore = defineStore('todo', () => {
       console.error('讀取 Todo 失敗', err)
       error.value = '無法載入待辦事項'
     } finally {
-      // 無論成功失敗，最後都要關閉 isLoading
       isLoading.value = false
     }
   }

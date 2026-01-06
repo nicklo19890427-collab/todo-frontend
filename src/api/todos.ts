@@ -4,9 +4,15 @@ import type { Todo } from '@/types'
 export const todoApi = {
   getAll: () => api.get<Todo[]>('/api/todos'),
 
-  // ✨ 修正：加入 keyword 參數
-  search: (params: { keyword?: string; categoryId?: number; priority?: string; date?: string }) =>
-    api.get<Todo[]>('/api/todos/search', { params }),
+  // ✨ 修改：加入排序參數
+  search: (params: {
+    keyword?: string
+    categoryId?: number
+    priority?: string
+    date?: string
+    sortBy?: string // 新增
+    direction?: string // 新增
+  }) => api.get<Todo[]>('/api/todos/search', { params }),
 
   create: (data: { title: string; categoryId?: number; priority?: string; dueDate?: string }) => {
     return api.post<Todo>('/api/todos', {

@@ -27,6 +27,9 @@ const query = ref({
   categoryId: '' as number | '',
   priority: 'ALL',
   dueDate: '',
+  // ✨ 設定預設排序：優先級 高 -> 低
+  sortBy: 'priority',
+  direction: 'desc',
 })
 
 // ✨ 新增：Dialog 相關狀態
@@ -158,6 +161,8 @@ const handleLogout = async () => {
         v-model:categoryId="query.categoryId"
         v-model:priority="query.priority"
         v-model:dueDate="query.dueDate"
+        v-model:sortBy="query.sortBy"
+        v-model:direction="query.direction"
       />
 
       <TodoList
