@@ -35,6 +35,7 @@ const emit = defineEmits<{
 </template>
 
 <style scoped>
+@reference "@/assets/main.css";
 .input-base {
   @apply appearance-none bg-white border border-gray-300 text-gray-700 text-sm rounded-lg focus:ring-emerald-500 focus:border-emerald-500 block py-2 outline-none hover:bg-gray-50 transition;
 }
