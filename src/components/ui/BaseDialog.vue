@@ -47,7 +47,7 @@ onUnmounted(() => {
         ></div>
 
         <div
-          class="relative bg-white rounded-xl shadow-2xl w-full max-h-[90vh] flex flex-col overflow-hidden transition-all transform"
+          class="relative bg-white rounded-xl shadow-2xl w-full max-h-[90vh] flex flex-col overflow-hidden transition-all"
           :class="width || 'max-w-md'"
         >
           <div
@@ -97,6 +97,7 @@ onUnmounted(() => {
 .dialog-enter-from .bg-white,
 .dialog-leave-to .bg-white {
   opacity: 0;
+  /* 這裡的 transform 是動畫用的，不會影響靜態顯示 */
   transform: scale(0.95) translateY(10px);
 }
 </style>

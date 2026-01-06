@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { ref, computed, onMounted, onUnmounted, nextTick, watch } from 'vue' // ✨ 加入 nextTick, watch
+import { ref, computed, onMounted, onUnmounted, nextTick } from 'vue' // ✨ 加入 nextTick
 import { FontAwesomeIcon } from '@fortawesome/vue-fontawesome'
 import { faChevronDown } from '@fortawesome/free-solid-svg-icons'
 

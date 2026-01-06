@@ -1,1 +1,64 @@
 @import 'tailwindcss';
+
+/* ✨ 強制覆蓋 Vue Datepicker 的主題變數 */
+/* 使用 .dp__theme_light 選擇器，權重比預設的 :root 更高，保證生效 */
+.dp__theme_light {
+  /* 主題色 (Emerald-500) */
+  --dp-primary-color: #10b981;
+  /* Hover 顏色 (Emerald-50) */
+  --dp-hover-color: #ecfdf5;
+  /* 選中文字顏色 */
+  --dp-primary-text-color: #ffffff;
+  /* 次要顏色 */
+  --dp-secondary-color: #9ca3af;
+
+  /* 圓角與字體 */
+  --dp-border-radius: 0.75rem;
+  --dp-cell-border-radius: 0.5rem;
+  --dp-font-family: inherit;
+
+  /* ✨ 加寬日曆 (預設約 250px) */
+  --dp-menu-min-width: 340px;
+}
+
+/* 讓彈出層有淡淡的陰影和邊框 */
+.dp__menu {
+  border: 1px solid #e5e7eb !important; /* border-gray-200 */
+  box-shadow:
+    0 10px 15px -3px rgb(0 0 0 / 0.1),
+    0 4px 6px -4px rgb(0 0 0 / 0.1) !important; /* shadow-xl */
+}
+
+/* 月份導航列垂直間距 */
+.dp__month_year_row {
+  padding-top: 0.75rem !important;
+  padding-bottom: 0.75rem !important;
+}
+
+/* ✨ 今日日期樣式：加上 Emerald 色邊框 */
+.dp__today {
+  border: 1px solid #10b981 !important;
+}
+
+/* 日期單元格 Hover 效果 */
+.dp__cell_inner:hover:not(.dp__active_date):not(.dp__range_between) {
+  background-color: #ecfdf5 !important; /* emerald-50 */
+  color: #047857 !important; /* emerald-700 */
+  font-weight: 500;
+}
+
+/* 底部按鈕區 */
+.dp__action_buttons {
+  padding: 1rem !important;
+  border-top: 1px solid #f3f4f6 !important; /* gray-100 */
+}
+
+/* 時間選擇器字體加粗 */
+.dp__time_display {
+  font-weight: 700 !important;
+  color: #374151 !important; /* gray-700 */
+}
+
+.dp__active_date {
+  background-color: #10b981 !important;
+}

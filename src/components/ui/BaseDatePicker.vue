@@ -1,10 +1,10 @@
 <script setup lang="ts">
-import { computed } from 'vue'
-import { DatePicker as VDatePicker } from 'v-calendar'
-import 'v-calendar/dist/style.css'
+import { computed, ref } from 'vue'
+import { VueDatePicker } from '@vuepic/vue-datepicker'
+import '@vuepic/vue-datepicker/dist/main.css'
 
 import { FontAwesomeIcon } from '@fortawesome/vue-fontawesome'
-import { faCalendarDays, faXmark } from '@fortawesome/free-solid-svg-icons'
+import { faCalendarDays, faXmark, faCheck } from '@fortawesome/free-solid-svg-icons' // ✨ 加入 check icon
 
 const props = defineProps<{
   modelValue: string | null
@@ -14,6 +14,8 @@ const props = defineProps<{
 const emit = defineEmits<{
   (e: 'update:modelValue', value: string | null): void
 }>()
+
+const isOpen = ref(false)
 
 const dateValue = computed({
   get: () => (props.modelValue ? new Date(props.modelValue) : null),
@@ -47,32 +49,28 @@ const displayValue = computed(() => {
   return `${Y}/${M}/${D} ${h}:${m}`
 })
 
-const onDayClick = (_: unknown, event: MouseEvent) => {
-  const target = event.target as HTMLElement
-  target?.blur()
+const format = (date: Date) => {
+  const Y = date.getFullYear()
+  const M = (date.getMonth() + 1).toString().padStart(2, '0')
+  const D = date.getDate().toString().padStart(2, '0')
+  const h = date.getHours().toString().padStart(2, '0')
+  const m = date.getMinutes().toString().padStart(2, '0')
+  return `${Y}/${M}/${D} ${h}:${m}`
 }
 </script>
 
 <template>
-  <div class="w-48">
-    <VDatePicker
+  <div class="w-full">
+    <VueDatePicker
       v-model="dateValue"
-      mode="dateTime"
-      color="emerald"
-      is24hr
-      hide-time-header
-      :popover="{
-        teleport: 'body',
-        visibility: 'click',
-        placement: 'bottom-start',
-        strategy: 'fixed',
-        class: 'my-popover-class' /* ✨ 1. 加入自訂 Class，確保能選中它 */,
-      }"
-      @dayclick="onDayClick"
+      v-model:open="isOpen"
+      teleport="body"
+      :enable-time-picker="true"
+      :is-24="true"
+      :format="format"
     >
-      <template #default="{ togglePopover }">
+      <template #trigger>
         <div
-          @click="togglePopover"
           class="input-base flex items-center justify-between cursor-pointer pl-9 pr-3 relative group"
         >
           <div
@@ -80,14 +78,12 @@ const onDayClick = (_: unknown, event: MouseEvent) => {
           >
             <font-awesome-icon :icon="faCalendarDays" class="text-sm" />
           </div>
-
           <span
             :class="modelValue ? 'text-gray-900 font-medium' : 'text-gray-400'"
             class="truncate"
           >
             {{ displayValue }}
           </span>
-
           <div
             v-if="modelValue"
             @click.stop="emit('update:modelValue', null)"
@@ -97,36 +93,31 @@ const onDayClick = (_: unknown, event: MouseEvent) => {
           </div>
         </div>
       </template>
-    </VDatePicker>
+
+      <template #action-buttons="{ selectDate }">
+        <div class="flex justify-end gap-2 w-full font-medium">
+          <button
+            @click="isOpen = false"
+            class="px-3 py-1.5 text-sm text-gray-500 hover:text-gray-700 hover:bg-gray-100 rounded-md transition"
+          >
+            取消
+          </button>
+          <button
+            @click="selectDate"
+            class="px-3 py-1.5 text-sm bg-emerald-500 text-white hover:bg-emerald-600 rounded-md transition flex items-center gap-1"
+          >
+            <font-awesome-icon :icon="faCheck" class="text-xs" />
+            確認
+          </button>
+        </div>
+      </template>
+    </VueDatePicker>
   </div>
 </template>
 
 <style scoped>
 @reference "@/assets/main.css";
-
 .input-base {
   @apply bg-white border border-gray-300 text-gray-700 text-sm rounded-lg hover:border-emerald-400 transition py-2;
-}
-</style>
-
-<style>
-/* 針對剛剛設定的自訂 Class 提升層級 */
-.my-popover-class {
-  z-index: 9999 !important;
-}
-
-/* 如果 v-calendar 內部還有其他 wrapper 擋住，也可以加這行保險 */
-.vc-popover-content {
-  z-index: 9999 !important;
-}
-
-/* 顏色修復 (因為移出了 Scoped 範圍) */
-.my-popover-class .vc-day-content.vc-highlight-content-solid {
-  background-color: #10b981 !important; /* emerald-500 */
-  color: #ffffff !important;
-}
-
-.my-popover-class .vc-day-content.vc-highlight-content-solid:hover {
-  background-color: #059669 !important; /* emerald-600 */
 }
 </style>
